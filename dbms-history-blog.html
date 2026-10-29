@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>History of DBMS and when not to use DBMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;--surface:#f6f9fa;--ink:#14202b;--muted:#51606d;--line:#b9c4cc;
+  --accent:#0f6f7d;--accent-soft:#d5ebee;--warn:#a8650f;--warn-soft:#f6e5cb;
+  --head:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.7 var(--body)}
+main{max-width:760px;margin:0 auto;padding:64px 20px 72px}
+h1,h2,h3{font-family:var(--head);line-height:1.12;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.6rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,4.5vw,2.1rem);font-weight:700;margin:64px 0 12px}
+h3{font-size:1.1rem;font-weight:700}
+p{margin:0 0 1em}
+
+/* Timeline: the one memorable element */
+.tl{list-style:none;margin:36px 0 0;padding:0;position:relative}
+.tl::before{content:"";position:absolute;left:78px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl li{display:grid;grid-template-columns:64px 1fr;column-gap:30px;margin-bottom:26px;position:relative}
+.tl li::before{content:"";position:absolute;left:72px;top:9px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:3px solid var(--accent)}
+.tl .yr{font-family:var(--head);font-weight:800;font-size:1.05rem;text-align:right;padding-top:2px;line-height:1.3}
+.tl .card{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:14px 18px 6px}
+.tl .card p{font-size:.98rem;color:var(--muted);margin:4px 0 8px;line-height:1.55}
+.tl .card h3 span{font-weight:500;color:var(--muted)}
+.tl li.nosql .card{border-left-color:var(--warn)}
+.tl li.nosql::before{border-color:var(--warn)}
+
+.pattern{background:var(--accent-soft);border-radius:6px;padding:18px 22px;margin-top:34px}
+.pattern p{margin:0}
+
+/* When not to use */
+.nots{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:12px}
+.nots li{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 18px}
+.nots strong{font-family:var(--head);display:block;font-size:1.05rem}
+.nots span{color:var(--muted);font-size:.98rem;line-height:1.55;display:block;margin-top:2px}
+
+/* Print: clean output for handouts */
+@media print{.theme{display:none}body{background:#fff;color:#000;font-size:12pt}.tl .card,.nots li{break-inside:avoid}a{color:inherit}}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.take{border-top:2px solid var(--ink);margin-top:64px;padding-top:18px}
+.cite{font-size:.75em;line-height:0;margin-left:2px}.cite a{color:var(--accent);text-decoration:none;font-family:var(--head);font-weight:700}
+.refs{margin-top:56px}.refs ol{padding-left:1.6em;margin:14px 0 0}.refs li{font-size:.95rem;line-height:1.55;margin-bottom:10px;color:var(--muted);padding-left:4px}.refs li em{color:var(--ink)}.refs a{color:var(--accent);word-break:break-word}
+@media (max-width:520px){
+  body{font-size:17px}
+  .tl::before{left:6px}
+  .tl li{grid-template-columns:1fr;padding-left:30px}
+  .tl li::before{left:0}
+  .tl .yr{text-align:left;margin-bottom:4px}
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>History of DBMS and when not to use DBMS</h1>
+  </header>
+
+  <h2 style="margin-top:44px">Introduction</h2>
+  <p>A database is an organized collection of data. A database management system (DBMS) is the software that sits between that data and the people or programs using it. It stores the data, finds it, changes it and protects it, so every application doesn’t have to rebuild those jobs from scratch.</p>
+  <p>Before DBMSs, each program usually kept its data in its own files. The same facts ended up copied in several places and drifted out of sync, and changing a file’s layout meant rewriting every program that read it. A DBMS replaced that with one shared home for the data and a set of guarantees: many users can work at once, the data stays correct, access can be controlled, and everything can be recovered after a failure.</p>
+  <p>That idea is about sixty years old, and it has been reinvented several times. Each new kind of database appeared because the previous kind hit a limit. This post does two things. First, it walks through that history, so you can see why relational, NoSQL and vector databases each exist. Second, it covers when you should not use a DBMS at all, because the simplest tool that does the job is often the right one.</p>
+
+  <h2>A short history</h2>
+  <ol class="tl">
+    <li><div class="yr">1960s</div><div class="card"><h3>File systems, IDS and IMS</h3><p>The first real DBMSs arrived with hierarchical and network models. Powerful, but rigid: you had to know the access paths in advance.<sup class="cite"><a href="#r1">[1]</a></sup></p></div></li>
+    <li><div class="yr">1970</div><div class="card"><h3>Codd’s relational model</h3><p>Data as plain tables, independent of how it’s stored. This idea shaped the next fifty years.<sup class="cite"><a href="#r2">[2]</a></sup></p></div></li>
+    <li><div class="yr">1970s</div><div class="card"><h3>System R, INGRES and SQL</h3><p>Proved the relational model was practical, and gave us a query language that’s still everywhere.</p></div></li>
+    <li><div class="yr">1980s</div><div class="card"><h3>Oracle, DB2, SQL standardized</h3><p>ANSI standardized SQL in 1986. Relational became the industry default.</p></div></li>
+    <li><div class="yr">1990s</div><div class="card"><h3>MySQL, PostgreSQL, data warehouses</h3><p>Open source and analytics went mainstream, and PostgreSQL grew out of Berkeley’s POSTGRES project.</p></div></li>
+    <li class="nosql"><div class="yr">2000s</div><div class="card"><h3>Bigtable, Dynamo, MongoDB, Redis <span>(NoSQL)</span></h3><p>Web-scale apps needed scale and flexible schemas, and accepted weaker consistency to get them.<sup class="cite"><a href="#r3">[3]</a></sup></p></div></li>
+    <li><div class="yr">2010s</div><div class="card"><h3>Spanner, cloud-managed DBs, NewSQL</h3><p>Distributed SQL with strong consistency, run for you by a cloud provider.<sup class="cite"><a href="#r4">[4]</a></sup></p></div></li>
+    <li><div class="yr">2020s</div><div class="card"><h3>Vector, serverless and multi-model</h3><p>Built for AI and embedding search, with elastic scaling.</p></div></li>
+  </ol>
+
+  <div class="pattern"><p><strong>The pattern:</strong> each wave fixed the previous one’s pain. Files had redundancy, hierarchical models were rigid, relational struggled with massive scale, and NoSQL traded some consistency for that scale.</p></div>
+
+  <h2>When not to use a DBMS</h2>
+  <p>A DBMS is powerful, but it isn’t free. Skip it in these cases:<sup class="cite"><a href="#r5">[5]</a></sup></p>
+  <ul class="nots">
+    <li><strong>Your data is small and simple</strong><span>A config file, a to-do list or a one-off script is fine with JSON, CSV or plain files.</span></li>
+    <li><strong>The app is fixed and single-user</strong><span>With no concurrent access, you pay for locking and transactions you’ll never use.</span></li>
+    <li><strong>You have hard real-time constraints</strong><span>A DBMS’s generality adds overhead that can break strict timing, as in embedded or control software.</span></li>
+    <li><strong>The data is mostly big blobs</strong><span>Videos, images and backups belong in object storage like S3, with only metadata in a database.</span></li>
+    <li><strong>You can’t afford the overhead</strong><span>Licensing, setup, admin skills, backups, security hardening and tuning all cost time and money.<sup class="cite"><a href="#r3">[3]</a></sup></span></li>
+    <li><strong>You need heavy analytics on huge raw data</strong><span>A general-purpose transactional database is the wrong tool. Use a data warehouse or columnar engine.</span></li>
+    <li><strong>The schema is completely unpredictable</strong><span>Forcing it into rigid tables can cost more than it gives.</span></li>
+  </ul>
+
+  <div class="take">
+    <h3>Takeaway</h3>
+    <p style="margin-top:8px">Use a DBMS when you need shared access, integrity, security and recovery. If you need none of those, you’re adding complexity for nothing. Learn the history to understand <em>why</em> each database type exists, then pick the simplest tool that does the job.</p>
+  </div>
+
+  <section class="refs" id="references">
+    <h2 style="margin-top:0">References</h2>
+    <ol>
+      <li id="r1">Bachman, C. W. (1973). The programmer as navigator (ACM Turing Award lecture). <em>Communications of the ACM</em>, 16(11), 653–658. <a href="https://www.arabou.edu.kw/faculties/computer/Documents/ReadingList/ITC/a1973-bachman.pdf" rel="noopener">PDF</a><span style="display:block;margin-top:3px;color:var(--ink)">Why read it: describes the 1960s style where programmers followed links from record to record. It shows what the relational model was reacting to.</span></li>
+      <li id="r2">Codd, E. F. (1970). A relational model of data for large shared data banks. <em>Communications of the ACM</em>, 13(6), 377–387. <a href="https://doi.org/10.1145/362384.362685" rel="noopener">doi:10.1145/362384.362685</a><span style="display:block;margin-top:3px;color:var(--ink)">Why read it: the paper that proposed storing data as tables, independent of how it is physically stored. It is the core idea behind SQL databases.</span></li>
+      <li id="r3">DeCandia, G., Hastorun, D., Jampani, M., Kakulapati, G., Lakshman, A., Pilchin, A., Sivasubramanian, S., Vosshall, P., &amp; Vogels, W. (2007). Dynamo: Amazon’s highly available key-value store. <em>Proceedings of SOSP ’07</em>, 205–220. <a href="https://www.allthingsdistributed.com/2007/10/amazons_dynamo.html" rel="noopener">Paper page</a><span style="display:block;margin-top:3px;color:var(--ink)">Why read it: Amazon explains why some services needed only simple key lookups, found a full relational database too heavy for them, and gave up some consistency to stay always available. It is a real example of the NoSQL trade-off and of when a full DBMS is more than you need.</span></li>
+      <li id="r4">Corbett, J. C., Dean, J., Epstein, M., et al. (2012). Spanner: Google’s globally distributed database. <em>Proceedings of OSDI ’12</em>. <a href="https://www.usenix.org/conference/osdi12/technical-sessions/presentation/corbett" rel="noopener">USENIX</a><span style="display:block;margin-top:3px;color:var(--ink)">Why read it: Google’s answer to the NoSQL trade-off. It keeps SQL-style transactions and strong consistency while spreading data across the world, which is the idea behind NewSQL.</span></li>
+      <li id="r5">Silberschatz, A., Korth, H. F., &amp; Sudarshan, S. (2019). <em>Database System Concepts</em> (7th ed.). McGraw-Hill. <a href="https://db-book.com/" rel="noopener">db-book.com</a><span style="display:block;margin-top:3px;color:var(--ink)">Why read it: the standard university textbook. Its chapters on transactions, concurrency control and recovery explain the shared access, integrity and recovery that a DBMS provides.</span></li>
+    </ol>
+  </section>
+</main>
+</body>
+</html>
